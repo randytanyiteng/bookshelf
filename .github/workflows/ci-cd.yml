@@ -1,17 +1,15 @@
-name: CI - Build and Test
+name: CI/CD - Build and Deploy to Netlify
 
 on:
   push:
     branches: [main]
-  pull_request:
-    branches: [main]
 
 jobs:
-  build-and-test:
+  build-deploy:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
+      - name: Checkout repo
         uses: actions/checkout@v3
 
       - name: Setup Node.js
@@ -25,5 +23,9 @@ jobs:
       - name: Run tests
         run: npm test -- --watchAll=false
 
-      - name: Build project
+      - name: Build app
         run: npm run build
+
+      - name: Deploy to Netlify
+        run: npx netlify-cli deploy --dir=build --prod --site=$NETLIFY_SITE_ID --auth=$NETLIFY_AUTH_TOKEN
+
