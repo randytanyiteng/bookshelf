@@ -1,37 +1,30 @@
-name: validate
+name: CI/CD - Build and Deploy to Netlify
+
 on:
   push:
-    branches:
-      - 'main'
-  pull_request:
-    branches:
-      - 'main'
+    branches: [main]
+
 jobs:
-  setup:
-    # ignore all-contributors PRs
-    if: ${{ !contains(github.head_ref, 'all-contributors') }}
-    strategy:
-      matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
-    runs-on: ${{ matrix.os }}
+  build-deploy:
+    runs-on: ubuntu-latest
+
     steps:
-      - name: ⬇️ Checkout repo
+      - name: Checkout repo
         uses: actions/checkout@v3
 
-      - name: ⎔ Setup node
+      - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
           node-version: 18
 
-      - name: npm 8
-        run: npm install --global npm@8
+      - name: Install dependencies
+        run: npm install
 
-      - name: ▶️ Run setup script
-        run: npm run setup
+      - name: Run tests
+        run: npm test -- --watchAll=false
 
       - name: Build app
         run: npm run build
 
       - name: Deploy to Netlify
         run: npx netlify-cli deploy --dir=build --prod --site=$NETLIFY_SITE_ID --auth=$NETLIFY_AUTH_TOKEN
-
